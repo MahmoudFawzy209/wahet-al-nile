@@ -1,0 +1,154 @@
+// Production PostgreSQL Schema for Nile Oasis Restaurant
+// Ready for Supabase, Neon, Render, Railway, or AWS RDS
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model RestaurantSettings {
+  id                String   @id @default("settings_singleton")
+  name              String   @default("مطعم واحة النيل")
+  tagline           String   @default("أصالة المذاق اليمني ودفء الضيافة")
+  description       String   @default("نقدم لكم ألذ وأشهى المأكولات اليمنية المحضرة على الأصول بطرق الطهي التقليدية والبهارات الطبيعية الفاخرة.")
+  phone             String   @default("+201012345678")
+  whatsappNumber    String   @default("201012345678")
+  address           String   @default("شارع النيل، الدقي، الجيزة، مصر")
+  openingHours      String   @default("يومياً من 11:00 صباحاً حتى 02:00 بعد منتصف الليل")
+  currency          String   @default("ج.م")
+  deliveryFee       Decimal  @default(35.0) @db.Decimal(10, 2)
+  minOrderAmount    Decimal  @default(100.0) @db.Decimal(10, 2)
+  estimatedPrepTime String   @default("30 - 45 دقيقة")
+  isOpen            Boolean  @default(true)
+  closedMessage     String   @default("نعتذر، المطعم مغلق حالياً ونستقبل طلباتكم غداً خلال أوقات العمل الرسمية.")
+  logoUrl           String?
+  heroImageUrl      String?
+  updatedAt         DateTime @updatedAt
+}
+
+model Category {
+  id           String     @id @default(cuid())
+  name         String
+  slug         String     @unique
+  description  String?
+  icon         String?
+  displayOrder Int        @default(0)
+  isActive     Boolean    @default(true)
+  items        MenuItem[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model MenuItem {
+  id           String            @id @default(cuid())
+  categoryId   String
+  category     Category          @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name         String
+  slug         String            @unique
+  description  String
+  basePrice    Decimal           @db.Decimal(10, 2)
+  imageUrl     String
+  isAvailable  Boolean           @default(true)
+  isFeatured   Boolean           @default(false)
+  displayOrder Int               @default(0)
+  servingSize  String?
+  variants     MenuItemVariant[]
+  addOns       MenuItemAddOn[]
+  orderItems   OrderItem[]
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+}
+
+model MenuItemVariant {
+  id           String   @id @default(cuid())
+  menuItemId   String
+  menuItem     MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  name         String
+  price        Decimal  @db.Decimal(10, 2)
+  isAvailable  Boolean  @default(true)
+  displayOrder Int      @default(0)
+}
+
+model AddOn {
+  id          String          @id @default(cuid())
+  name        String
+  price       Decimal         @db.Decimal(10, 2)
+  isAvailable Boolean         @default(true)
+  menuItems   MenuItemAddOn[]
+  createdAt   DateTime        @default(now())
+}
+
+model MenuItemAddOn {
+  id         String   @id @default(cuid())
+  menuItemId String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  addOnId    String
+  addOn      AddOn    @relation(fields: [addOnId], references: [id], onDelete: Cascade)
+
+  @@unique([menuItemId, addOnId])
+}
+
+model DeliveryZone {
+  id            String  @id @default(cuid())
+  name          String
+  fee           Decimal @db.Decimal(10, 2)
+  estimatedTime String
+  isActive      Boolean @default(true)
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  orderNumber     String      @unique
+  customerName    String
+  customerPhone   String
+  fulfillmentType String // "DELIVERY" | "PICKUP"
+  deliveryAddress String?
+  deliveryZone    String?
+  customerNotes   String?
+  status          String      @default("NEW") // "NEW" | "CONFIRMED" | "PREPARING" | "READY_FOR_PICKUP" | "OUT_FOR_DELIVERY" | "COMPLETED" | "CANCELLED"
+  paymentMethod   String      @default("CASH_ON_DELIVERY")
+  paymentStatus   String      @default("PENDING") // "PENDING" | "COLLECTED"
+  subtotal        Decimal     @db.Decimal(10, 2)
+  deliveryFee     Decimal     @default(0) @db.Decimal(10, 2)
+  totalAmount     Decimal     @db.Decimal(10, 2)
+  items           OrderItem[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model OrderItem {
+  id          String            @id @default(cuid())
+  orderId     String
+  order       Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItemId  String?
+  menuItem    MenuItem?         @relation(fields: [menuItemId], references: [id], onDelete: SetNull)
+  itemName    String
+  variantName String?
+  unitPrice   Decimal           @db.Decimal(10, 2)
+  quantity    Int
+  totalPrice  Decimal           @db.Decimal(10, 2)
+  itemNotes   String?
+  addOns      OrderItemAddOn[]
+}
+
+model OrderItemAddOn {
+  id          String    @id @default(cuid())
+  orderItemId String
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  addOnName   String
+  price       Decimal   @db.Decimal(10, 2)
+}

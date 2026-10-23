@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+:root {
+  --background: #140d07;
+  --foreground: #fbf7ee;
+  --card-bg: #1e130a;
+  --card-border: #382414;
+  --accent-amber: #d97706;
+  --accent-gold: #f59e0b;
+  --accent-crimson: #b91c1c;
+  --accent-sand: #f5ede0;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: 'Cairo', 'Tajawal', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  direction: rtl;
+  text-align: right;
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar for Authentic Traditional Feel */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #160e08;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3e2616;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #b45309;
+}
+
+/* Subtle Yemeni Geometric Motif Line */
+.yemeni-border-pattern {
+  background-image: radial-gradient(#d97706 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* Glass and Glow Utilities */
+.glass-panel {
+  background: rgba(30, 19, 10, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(217, 119, 6, 0.2);
+}
+
+.gold-glow {
+  box-shadow: 0 0 25px -5px rgba(245, 158, 11, 0.25);
+}
+
+.crimson-glow {
+  box-shadow: 0 0 25px -5px rgba(185, 28, 28, 0.3);
+}
+
+/* Smooth transitions */
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
